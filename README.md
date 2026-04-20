@@ -7,7 +7,6 @@ TigerGraph GraphRAG is an AI assistant that is meticulously designed to combine 
 * A knowledge graph builder for managing documents and graphs
 
 ### Nature Language Query
-![Nature Language Query](./docs/img/NatureLanguageQuery-Architecture.png)
 When a question is posed in natural language, GraphRAG employs a novel three-phase interaction with both the TigerGraph database and a LLM of the user's choice, to obtain accurate and relevant responses.
 
 The first phase aligns the question with the particular data available in the database. GraphRAG uses the LLM to compare the question with the graph’s schema and replace entities in the question by graph elements. For example, if there is a vertex type of `BareMetalNode` and the user asks `How many servers are there?`, the question will be translated to `How many BareMetalNode vertices are there?`. In the second phase, GraphRAG uses the LLM to compare the transformed question with a set of curated database queries and functions in order to select the best match. In the third phase, GraphRAG executes the identified query and returns the result in natural language along with the reasoning behind the actions.
@@ -15,7 +14,6 @@ The first phase aligns the question with the particular data available in the da
 Using pre-approved queries provides multiple benefits. First and foremost, it reduces the likelihood of hallucinations, because the meaning and behavior of each query has been validated.  Second, the system has the potential of predicting the execution resources needed to answer the question.
 
 ### Knowledge Graph Query
-![Knowledge Graph Query](./docs/img/GraphRAG-Architecture.png)
 For inquiries cannot be answered with structured graph data, GraphRAG employs an AI chatbots with graph-augmented Knowledge Graph based on a user's own documents or text data. It builds a knowledge graph from source material and applies its unique variant of knowledge graph-based RAG (Retrieval Augmented Generation) to improve the contextual relevance and accuracy of answers to natural-language questions.
 
 GraphRAG will also identify concepts and build an ontology, to add semantics and reasoning to the knowledge graph, or users can provide their own concept ontology. Then, with this comprehensive knowledge graph, GraphRAG performs hybrid retrievals, combining traditional vector search and graph traversals, to collect more relevant information and richer context to answer users’ knowledge questions.
@@ -48,9 +46,6 @@ curl -k https://raw.githubusercontent.com/tigergraph/graphrag/refs/heads/main/do
 
 The GraphRAG instances will be deployed at `./graphrag` folder and connect to TigerGraph instance at `http://localhost:14240` by default.
 To change installation folder, TigerGraph instance location or username/password, use `bash -s -- <graphrag_folder> <llm_provider> <tg_host> <tg_port> <tg_username> <tg_password>` instead of `bash` at the end of the above command.
-
-[Go back to top](#top)
-
 
 ### Deploy GraphRAG Manually
 The GraphRAG services can be deployed manually using Docker Compose or Kubernetes with updated configurations for different use cases.
@@ -108,19 +103,13 @@ This line can be changed to support different logging levels.
 | NOTSET | All messages are processed. |
 
 ##### Step 5: Start all services
-
 Now, simply run `docker compose up -d` and wait for all the services to start.
-
 > Note: `graphrag` container will be down if TigerGraph service is not ready. Log into the `tigergraph` container, bring up tigergraph services and rerun `docker compose up -d` should resolve the issue.
 
 ##### Step 6: Stop all services (when needed)
-
 Run command `docker compose down` and wait for all the service containers to stopped and removed.
 
-[Go back to top](#top)
-
 #### Use Standalone TigerGraph instance (If preferred)
-
 > **_Note:_** Vector feature is available in both TigerGraph Community Edition 4.2.0+ and Enterprise Edition 4.2.0+.
 
 If you prefer to start a TigerGraph Community Edition instance without a license key, please make sure the container can be accessed from the GraphRAG containers by add `--network graphrag_default`:
@@ -144,50 +133,31 @@ After using the database, and you want to shutdown it, use the following shell c
 gadmin stop all
 ```
 
-[Go back to top](#top)
-
-
 #### Manual Deploy of GraphRAG with Kubernetes
-
 ##### Step 1: Get kubernetes deployment file
   Download the [graphrag-k8s.yml](https://raw.githubusercontent.com/tigergraph/graphrag/refs/heads/main/docs/tutorials/graphrag-k8s.yml) file directly
-
 ##### Step 2: Modify `graphrag-k8s.yml` (Optional)
   Remove the sections for tigergraph instance if you're using a standalone TigerGraph instance instead
-
 ##### Step 3: Set up server configurations
   Next, in the same directory as the Kubernetes deployment file is in, create a `configs` directory and download the following configuration files:
   * [configs/server_config.json](https://raw.githubusercontent.com/tigergraph/graphrag/refs/heads/main/docs/tutorials/configs/server_config.json)
-
   Update the TigerGraph database information, LLM API keys and other configs accordingly.
-
 ##### Step 4: Install Nginx Ingress (Optional)
   If Nginx Ingress is not installed yet, it can be installed using `kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.1/deploy/static/provider/cloud/deploy.yaml`
-
 ##### Step 5: Start all services
   Replace `/path/to/graphrag/configs` with the absolute path of the `configs` folder inside `graphrag-k8s.yml`, and update the TigerGraph database information and other configs accordingly.
-
   Now, simply run `kubectl apply -f graphrag-k8s.yml` and wait for all the services to start.
-
 ##### Step 6: Stop all services (Optional)
   Run kubectl delete -f graphrag-k8s.yml and wait for all the services in the deployment to be deleted.
-
 > Note: Nginx Ingress should be deleted using kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.1/deploy/static/provider/cloud/deploy.yaml if port 80 needs to be released
-
-[Go back to top](#top)
-
 ---
-
 ## Use TigerGraph GraphRAG
-
 GraphRAG is friendly to both technical and non-technical users. There is a graphical chat interface as well as API access to GraphRAG. Function-wise, GraphRAG can answer your questions by calling existing queries in the database, build a knowledge graph from your documents, and answer knowledge questions based on your documents.
 
 ### Run Demo with Preloaded GraphRAG
-
 The pre-loaded knowledge graph `TigerGraphRAG` is provided for an express access to the GraphRAG features.
 
 #### Step 1: Get data package
-
 Download the following data file and put it under `/home/tigergraph/graphrag/` inside your TigerGraph container:
 * [ExportedGraph.zip](https://raw.githubusercontent.com/tigergraph/graphrag/refs/heads/main/docs/data/ExportedGraph.zip)
 
