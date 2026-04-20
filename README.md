@@ -1,80 +1,13 @@
 # TigerGraph GraphRAG
-
-> ⚠️ **Disclaimer**  
 > - **Supported Backend:** TigerGraph is the only Vector and Graph DB supported in this project. Hybrid Search is the officially retriever method supported at backend.  
-> - **Limitations:** No official support is provided unless delivered through a Statement of Work (SOW) with the Solutions team. Customizations are customer-owned self-service to handle custom LLM service, prompt logic, UI integration, and pipeline orchestration. This project is provided "as is" without any warranties or guarantees.
-
-## Table of Contents
-
-- [Releases](#releases)
-- [Overview](#overview)
-  - [Nature Language Query](#nature-language-query)
-  - [Knowledge Graph Query](#knowledge-graph-query)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Quick Start](#quick-start)
-    - [Use TigerGraph Docker-Based Instance](#use-tigergraph-docker-based-instance)
-    - [Use Pre-Installed TigerGraph Instance](#use-pre-installed-tigergraph-instance)
-  - [Deploy GraphRAG Manually](#deploy-graphrag-manually)
-    - [Manual Deploy of GraphRAG with Docker Compose](#manual-deploy-of-graphrag-with-docker-compose)
-    - [Use Standalone TigerGraph instance (If preferred)](#use-standalone-tigergraph-instance-if-preferred)
-    - [Manual Deploy of GraphRAG with Kubernetes](#manual-deploy-of-graphrag-with-kubernetes)
-- [Use TigerGraph GraphRAG](#use-tigergraph-graphrag)
-  - [Run Demo with Preloaded GraphRAG](#run-demo-with-preloaded-graphrag)
-  - [Manually Build GraphRAG From Scratch](#manually-build-graphrag-from-scratch)
-- [Document Ingestion for Knowledge Graph](#document-ingestion-for-knowledge-graph)
-  - [Ingest Documents from the UI](#ingest-documents-from-the-ui)
-    - [Local File Upload](#local-file-upload)
-    - [Download from Cloud](#download-from-cloud)
-    - [Use Amazon BDA](#use-amazon-bda)
-  - [Ingest Documents via API](#ingest-documents-via-api)
-- [More Detailed Configurations](#more-detailed-configurations)
-  - [DB configuration](#db-configuration)
-  - [GraphRAG configuration](#graphrag-configuration)
-  - [Chat History Configuration](#chat-history-configuration)
-  - [LLM provider configuration](#llm-provider-configuration)
-    - [Supported parameters](#supported-parameters)
-    - [Provider examples](#provider-examples)
-    - [OpenAI](#openai)
-    - [Google GenAI](#google-genai)
-    - [GCP VertexAI](#gcp-vertexai)
-    - [Azure](#azure)
-    - [AWS Bedrock](#aws-bedrock)
-    - [Ollama](#ollama)
-    - [Hugging Face](#hugging-face)
-    - [Groq](#groq)
-- [Customization and Extensibility](#customization-and-extensibility)
-  - [Test Your Code Changes](#test-your-code-changes)
-    - [Testing with Pytest](#testing-with-pytest)
-    - [Test Code Change in Docker Container](#test-code-change-in-docker-container)
-  - [Test Script Options](#test-script-options)
-    - [Configure LLM Service](#configure-llm-service)
-    - [Configure Testing Graphs](#configure-testing-graphs)
-    - [Configure Weights and Biases](#configure-weights-and-biases)
-
----
-
-## Releases
-* **2/28/2026**: GraphRAG v1.2.0 released. Added Admin UI for graph initialization, document ingestion, and knowledge graph rebuild, along with many other improvements and bug fixes. See [release notes](https://github.com/tigergraph/graphrag/releases/tag/v1.2.0) for details.
-* **9/22/2025**: GraphRAG is available now officially v1.1 (v1.1.0). AWS Bedrock support is completed with BDA integration for multimodal document ingestion. See [release notes](https://github.com/tigergraph/graphrag/releases/tag/v1.1.0) for details.
-* **6/18/2025**: GraphRAG is available now officially v1.0 (v1.0.0). TigerGraph database is the only graph and vector storagge supported.
-Please see [Release Notes](https://docs.tigergraph.com/tg-graphrag/current/release-notes/) for details.
-
----
 
 ## Overview
-
-![GraphRAG Overview](./docs/img/TG-GraphRAG-Overview.png)
-
 TigerGraph GraphRAG is an AI assistant that is meticulously designed to combine the powers of vector store, graph databases and generative AI to draw the most value from data and to enhance productivity across various business functions, including analytics, development, and administration tasks. It is one AI assistant with two core component services:
 * A natural language assistant for Q&A with graph-powered solutions
 * A knowledge graph builder for managing documents and graphs
 
-You can interact with GraphRAG through the built-in chat interface and APIs. For now, your own LLM services (from OpenAI, Azure, GCP, AWS Bedrock, Ollama, Hugging Face and Groq.) are required to use GraphRAG, but in future releases you can use TigerGraph’s LLMs.
-
 ### Nature Language Query
 ![Nature Language Query](./docs/img/NatureLanguageQuery-Architecture.png)
-
 When a question is posed in natural language, GraphRAG employs a novel three-phase interaction with both the TigerGraph database and a LLM of the user's choice, to obtain accurate and relevant responses.
 
 The first phase aligns the question with the particular data available in the database. GraphRAG uses the LLM to compare the question with the graph’s schema and replace entities in the question by graph elements. For example, if there is a vertex type of `BareMetalNode` and the user asks `How many servers are there?`, the question will be translated to `How many BareMetalNode vertices are there?`. In the second phase, GraphRAG uses the LLM to compare the transformed question with a set of curated database queries and functions in order to select the best match. In the third phase, GraphRAG executes the identified query and returns the result in natural language along with the reasoning behind the actions.
@@ -83,27 +16,19 @@ Using pre-approved queries provides multiple benefits. First and foremost, it re
 
 ### Knowledge Graph Query
 ![Knowledge Graph Query](./docs/img/GraphRAG-Architecture.png)
-
 For inquiries cannot be answered with structured graph data, GraphRAG employs an AI chatbots with graph-augmented Knowledge Graph based on a user's own documents or text data. It builds a knowledge graph from source material and applies its unique variant of knowledge graph-based RAG (Retrieval Augmented Generation) to improve the contextual relevance and accuracy of answers to natural-language questions.
 
 GraphRAG will also identify concepts and build an ontology, to add semantics and reasoning to the knowledge graph, or users can provide their own concept ontology. Then, with this comprehensive knowledge graph, GraphRAG performs hybrid retrievals, combining traditional vector search and graph traversals, to collect more relevant information and richer context to answer users’ knowledge questions.
 
 Organizing the data as a knowledge graph allows a chatbot to access accurate, fact-based information quickly and efficiently, thereby reducing the reliance on generating responses from patterns learned during training, which can sometimes be incorrect or out of date.
 
-[Go back to top](#top)
-
----
-
 ## Getting Started
-
 ### Prerequisites
 * Docker + Docker Compose Plugin, or Kubernetes
 * TigerGraph DB 4.2+.
-* API key of your LLM provider. (An LLM provider refers to a company or organization that offers Large Language Models (LLMs) as a service. The API key verifies the identity of the requester, ensuring that the request is coming from a registered and authorized user or application.) Currently, GraphRAG supports the following LLM providers: OpenAI, Azure OpenAI, GCP, AWS Bedrock.
-
+* API key of LLM provider. (An LLM provider refers to a company or organization that offers Large Language Models (LLMs) as a service. The API key verifies the identity of the requester, ensuring that the request is coming from a registered and authorized user or application.) Currently, GraphRAG supports the following LLM providers: OpenAI, Azure OpenAI, GCP, AWS Bedrock.
 
 ### Quick Start
-
 #### Use TigerGraph Docker-Based Instance
 Set your LLM Provider (supported `openai` or `gemini`) api key as environment variable LLM_API_KEY and use the following command for a one-step quick deployment with TigerGraph Community Edition and default configurations:
 ```
